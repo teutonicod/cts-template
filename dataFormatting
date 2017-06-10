@@ -1,0 +1,34 @@
+Formatting of a dataset for NONMEM run
+
+The package contains a function called dataFormatting which allows to change the structure of a dataset 
+in order to have a format of the data readable by NONMEM. 
+This formatting step consists in the inclusion of column like ADDL, MDV, II, COMP, ... and also to the duplication of some rows when needed (e.g. when the same time point need to specified for each compartment). A detailed description of the argument of the function is reported in the help page, accessible with the command ?dataFormatting.
+
+Please, notice that in some cases the output of the function does not fit completely the required data structure of the model. 
+In this cases it is possible to save the output of the function in a data frame, instead of creating a .csv file, and apply the changes needed. In the following code will be provided an example of this situation.
+
+In the package it is also available a GUI function for the data formatting, dataFormattingGUI. With this function it is possible to include the formatting specifications directly within a Graphical User Interface, have a preview of the corresponding data frame and eventually save the dataset on the hard drive. The use of this function is only suggested for training purposes, e.g. to have a better understanding of how each formatting specification affect the final dataset, since the function in scripting form (dataFormatting) allow to keep trace of the structural changes applied to the data set.
+
+Requirements from the function
+
+The dataset to format must have a column with header ID to identify the subject and a column DOSE (only if the option 'placeboDose' is not NULL.
+Example of R code for NONMEM data formatting
+
+```
+
+myDataset <- dataFormatting(myADDL = NULL, # ADDL col not included myII = NULL, # II col not included nComp = ".", # The argument is needed by the function DVcomp = ".", # The argument is needed by the function inAMT = "d", # The initial AMT will be the individual dose includeBaseline = FALSE, # First time point row not be replicated myDataset = "myTrial.csv", # Name of the dataset to format readFile = TRUE, 
+writeFile = FALSE, placeboDose = NULL, datasetPath = getwd())
+
+head(myDataset) head(d)
+
+Deletion of the unused columns
+
+myDataset$TRT <- NULL myDataset$EVID <- NULL myDataset$CMT <- NULL
+
+head(myDataset) head(d)
+
+write.csv(myDataset,"myDataset.csv",quote=FALSE, row.names=FALSE)
+
+```
+
+After the run, the following dataset will be stored in the file "myDataset.csv". Please notice that according to this dataset, the first time point (in this case 0) will not be simulated since associated to an MDV of 1. If also this time point need to be simulated, the option includeBaseline in the function should be TRUE.
