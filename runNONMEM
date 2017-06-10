@@ -1,0 +1,52 @@
+
+
+How run NONMEM from an R script
+
+This function allow to lunch a NONMEM run directly from the R shell. The function will open a shell window on which it is possibe to see the output of the run. If not all the output from NONMEM it is required and a large number of simulations need to be performed (e.g. in a CTS exercise) it is possible to provide a list of file names or folders to be deleted. It is also possible to ask the function to change the seed within the NONMEM control file; this option is particularly useful if the function is included within an iterative loop. The argument i of the function will be added to the current seed in order to change it at each call of the function, so e.g. within a for loop it is possible to use the index of the loop to assure a different seed at each call.
+
+Example of R code to run NONMEM
+
+```
+
+Run the command nmf6 followed by the string nonmemModel
+
+In this way, it is not possible to
+
+change the seed within the modelfile
+
+Since the modelfile is provided together with the output file
+
+runNonmem(nonmemModel = "modelSim.mod table", changeSeed = FALSE, i = 1, deleteFiles = TRUE, fileToDelete = c("PRDERR","nonmem.exe","LINK", "ifort.txt","fsubs.obj","fsubs.for", "FSUBS","FSTREAM","FREPORT", "FDATA","FCON","table"), commandToExecute = "nmfe6", appendModel=TRUE)
+
+The command executed on the shell will be "nmfe6 modelSim.mod table"
+
+The function do not need a model file, it will only execute the string commandToExecute
+runNonmem(changeSeed = FALSE, i = 1, deleteFiles = TRUE, fileToDelete = c("PRDERR","nonmem.exe","LINK", "ifort.txt","fsubs.obj","fsubs.for", "FSUBS","FSTREAM","FREPORT", "FDATA","FCON","table"), commandToExecute = "nmfe6 modelSim.mod table", appendModel=FALSE)
+
+The command executed on the shell will be "nmfe6 modelSim.mod table"
+
+The function will only execute the string commandToExecute,
+
+but will take the model file from the string nonmemModel
+
+in order to change the seed within this file
+
+In this way, the output file (table) can be specified
+
+directly in the commandToExecute option
+
+runNonmem(nonmemModel = "modelSim.mod", changeSeed = TRUE, i = 1, deleteFiles = TRUE, fileToDelete = c("PRDERR","nonmem.exe","LINK", "ifort.txt","fsubs.obj","fsubs.for", "FSUBS","FSTREAM","FREPORT", "FDATA","FCON","table"), commandToExecute = "nmfe6 modelSim.mod table", appendModel=FALSE)
+
+The command executed on the shell will be "nmfe6 modelSim.mod table"
+
+EXAMPLE of WRONG CODE
+
+runNonmem(nonmemModel = "modelSim.mod", changeSeed = TRUE, i = 1, deleteFiles = TRUE, fileToDelete = c("PRDERR","nonmem.exe","LINK", "ifort.txt","fsubs.obj","fsubs.for", "FSUBS","FSTREAM","FREPORT", "FDATA","FCON","table"), commandToExecute = "nmfe6 modelSim.mod table", appendModel=TRUE)
+
+The command executed on the shell will
+
+be "nmfe6 modelSim.mod table modelSim.mod"
+
+The model name is already present in the command to execute and
+
+it will also appended since appendModel is TRUE
