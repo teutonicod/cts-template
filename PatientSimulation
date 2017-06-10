@@ -1,0 +1,197 @@
+
+Simulation of virtual patients
+
+In this section will be showed how use the template to simulate a new pop- ulation of patients. 
+In order to do that, the only requirement is to have a dataset containing the covariates matrix. 
+The template include two different methods to simulate covariates
+
+Resampling method - This approach consist in a random resempling of the provided dataset. 
+                    In order to perform the resampling the function in the template recall the function 
+                    createExternalCovariates in the package MSToolkit.
+
+Distribution based method - This approach consist in computing a multivariate normal distribution. 
+                            In order to perform the covariate simulation step, the high-level function multivariatePatients 
+                            recall the low-level function function covMultivarDist.
+
+Although the package contains specific functions for the simulation of covariates 
+(i.e. createExternalCovariates from MSToolkit and covMultivarDist) the global process of patient and study design 
+simulation may also be performed by high level functions (i.e. resamplingPatients and multivariatePatients). 
+This high level functions recall the low level functions to simulate the covariate matrix, 
+but in addition to that they also simulate the study design and allocate each patient to a specific treatment group. 
+Examples of the use of these functions is provided below.
+
+
+Requirements
+
+A dataset containing the covariates, this dataset must also contain a column indicating the subject ID. 
+The only mandatory columns in the dataset are the ones containing the covariates and a column containing a subject identifier; 
+all the other column are ignored.
+
+Use of resampling method
+
+This simulation is performed using the function resamplingPatients, for more technical information on this function please 
+read the function help file, available with the command ?resamplingPatients.
+
+Example of R code
+
+```
+
+d <- read.csv("CS1_IV1EST_PAR.csv",header=TRUE)
+
+head(d)
+
+In order to make the code cleaner, we will define in R a variable for each argument of the function
+
+Number of subject to include in the trial
+This will be the total number of subjects and will be equally divided between the treatments
+
+myPatients <- 100
+
+Vector of doses to include in the trial.
+In the real data we have 100 and 250
+
+myDoses <- c(0,100,200)
+
+Vector of times
+
+myTimes <- c(0,0.2,0.5,1,2,4,6,12,15,18,24)
+
+Variable that define the study design.
+
+May take values "Parallel" or "Crossover"
+
+myStudyType <- "Parallel"
+
+Variable that define the header of the column in the dataset
+
+reporting the subject ID
+
+myHeader = "CID"
+
+Vector of names indicating the covariates to sample
+
+myCovariatesNames <- c("AGE", "WT", "SCR", "ISM", "CLCR")
+
+Name of the dataset containing the covariates
+
+myDataset <- "CS1_IV1EST_PAR.csv"
+
+Path indicating where the dataset with the covariates is.
+
+the default value is the working directory,
+
+so if the dataset is in this directory
+
+you can can ignore this argument
+
+covariatePath <- getwd()
+
+Variable that define if you want to create a new dataset
+
+If this variable is FALSE, the function create a dataframe
+
+In this case, you may want to use expressions
+
+like d <- resamplingPatients(...)
+
+to assign the dataframe to an R object
+
+writeFile <- TRUE
+
+Call to the function with the variables that we defined
+
+resamplingPatients(myPatients, myDoses, myTimes, myStudyType, myHeader, myCovariatesNames, myDataset, covariatePath, writeFile)
+
+```
+
+Use of multivariate method
+
+In this section it will showed how to simulate a dataset using a multivariate normal distribution to simulate the covariates. This simulation is performed with the function multivariatePatients. This function recall the package function covMultivarDist in the actual covariate simulation step. The way how to use this function is almost identical to the function resamplingPatients, the only difference is that in this case the names of the covariates to sample mast be provided dividing the continuous and the categorical ones.
+
+Example of R code
+
+```
+
+d <- read.csv("CS1_IV1EST_PAR.csv",header=TRUE)
+
+head(d)
+
+In order to make the code cleaner, we will define in R a
+
+variable for each argument of the function
+
+Number of subject to include in the trial
+
+This will be the total number of subjects
+
+and will be equally divided between the treatments
+
+myPatients <- 100
+
+Vector of doses to include in the trial.
+
+In the real data we have 100 and 250
+
+myDoses <- c(0,100,200)
+
+Vector of times
+
+myTimes <- c(0,0.2,0.5,1,2,4,6,12,15,18,24)
+
+Variable that define the study design.
+
+May be "Parallel" or "Crossover"
+
+myStudyType <- "Parallel"
+
+Variable that define the header of the column in the dataset
+
+reporting the subject ID
+
+myHeader = "CID"
+
+This options represent the only difference in syntax
+
+with the function resamplingPatients()
+
+Instead of a single vector of names containing all the
+
+covariates to sample in this case must be provided 2 vectors,
+
+one for the continuous covariates and one for the categoricals
+
+catNames <- c("ISM") contNames <- c("AGE", "WT", "SCR", "CLCR")
+
+Name of the dataset containing the covariates
+
+myDataset <- "CS1_IV1EST_PAR.csv"
+
+Path indicating where the dataset with the covariates is.
+
+the default value is the working directory,
+
+so if the dataset is in this directory
+
+you can can ignore this argument
+
+covariatePath <- getwd()
+
+Variable that define if you want to create a new dataset
+
+If this variable is FALSE, the function create a dataframe
+
+In this case, you may want to use expressions like
+
+d <- multivariatePatients(...) to assign the dataframe to an R object
+
+writeFile <- TRUE
+
+Variable describing the name of the new dataset that will be created
+
+This variable is necessary only if writeFile=TRUE
+
+newDatasetName <- "myTrial.csv"
+
+We recall the function with the variables thet we defined
+
+multivariatePatients(myPatients, myDoses, myTimes, myStudyType, myHeader, catNames, contNames, myDataset, covariatePath, writeFile, newDatasetName)
