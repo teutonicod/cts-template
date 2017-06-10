@@ -1,0 +1,56 @@
+General considerations
+
+The package contains a wrap function called startSimulations which allow basically to replicate the execution of a specific script. The function require the script to execute, the list of the files required for the execution of the script (e.g. model files, datasets,...) and the number of times the execution should be repeated. The function will then create a new folder in the working directory, copy within this folder all the files provided and will execute the script. The seed in R will be changed at each simulation. The function will create a variable mySimID which will represent a simulation ID and it will change in each simulation. This variable may be used within the R script to execute if needed, e.g. to change the seed of NONMEM at each simulation. Please notice that this simulation approach may be different compared to simulate n times the same population, as it happen in NONMEM with the command SUBPROBLEMS in $SIM. In this case, it is possible to simulate a new population (new covariates) at each run by changing the seed in R.
+
+Example of R code for a Clinical Trial Simulation
+
+Below it is reported an example of script which could be used for a simulation. This script should be saved in a file, in the example called myScript.r.
+
+```
+
+d <- read.csv("CS1_IV1EST_PAR.csv",header=TRUE)
+
+myPatients <- 100
+
+myDoses <- c(0,100,200)
+
+myTimes <- c(0,0.2,0.5,1,2,4,6,12,15,18,24)
+
+myStudyType <- "Parallel"
+
+myHeader = "CID"
+
+catNames <- c("ISM") contNames <- c("AGE", "WT", "SCR", "CLCR")
+
+myDataset <- "CS1_IV1EST_PAR.csv"
+
+covariatePath <- getwd()
+
+writeFile <- FALSE
+
+newDatasetName <- "myTrial.csv"
+
+myTrial <- multivariatePatients(myPatients, myDoses, myTimes, myStudyType, myHeader, catNames, contNames, myDataset, covariatePath, writeFile,newDatasetName)
+
+myDataset <- dataFormatting(myADDL = NULL, 
+myII = NULL, 
+nComp = ".", 
+DVcomp = ".", inAMT = "d", 
+includeBaseline = FALSE, myDataset = myTrial, readFile = FALSE, 
+writeFile = FALSE, placeboDose = NULL, datasetPath = getwd())
+
+myDataset$TRT <- NULL myDataset$EVID <- NULL myDataset$CMT <- NULL
+
+write.csv(myDataset,"myDataset.csv",quote=FALSE, row.names=FALSE)
+
+runNonmem(nonmemModel = "modelSim.mod table", changeSeed = FALSE, i = mySimID, # The seed will change at each run deleteFiles = TRUE, fileToDelete = c("PRDERR","nonmem.exe","LINK", "ifort.txt","fsubs.obj","fsubs.for", "FSUBS","FSTREAM","FREPORT", "FDATA","FCON","table"), commandToExecute = "nmfe6", appendModel=TRUE)
+
+```
+
+Once that the script myScript.r is created it may be used by the function startSimulations to replicate the simulation. Below it is reported an example of code. The script to execute and the file needed by the script must be present in the working directory.
+
+```
+
+startSimulations <-(n = 3, startingSeed = 12345, filesToCopy =c("CS1_IV1EST_PAR.csv",modelSim.mod), scriptToExeute ="myScript.r")
+
+```
